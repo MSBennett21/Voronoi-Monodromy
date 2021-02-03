@@ -5,12 +5,13 @@ option package;
 
 
 export 
-Monodromy, PriorityQueue;
+    Monodromy,
+    PriorityQueue;
 
 
 
-$include "Monodromy.mm"
-$include "PriorityQueue.mm"
+$include "Voronoi-Monodromy//Monodromy.mm"
+$include "Voronoi-Monodromy//PriorityQueue.mm"
 
 
-end module;
+end module:

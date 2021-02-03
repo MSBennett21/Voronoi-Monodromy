@@ -1,88 +1,86 @@
-Monodromy:=proc(f,x,y,percision) local Bisector, Edge, intersections, SweepLine, Data  ,n, N, j,r, yhat, problemPtsRaw:={}, singularitiesRaw,branchPtsRaw, problemPts:={}, problemPtsFts:={},problemPtsFts1:={}, f_x, f_y, minimalDist, val:=1, center, aux_fun1, auxSites:={}, plotter; 
-global FortunesAlgorithm; uses ComputationalGeometry;
+Monodromy:=proc(f,x,y,percision) 
+	local 
+	# sub-procedures/modules
+	FortunesAlgorithm, Bisector, Edge, intersections, SweepLine, Data,
+	# local variables
+	n, f_y, problemPtsRaw:={}, j, problemPts:={}, problemPtsFloat:={},N, centerOfData,r, boundarySites:={}, minimalDist, val:=1, aux_fun1, plotter; 
+	uses ComputationalGeometry;
+	with(algcurves);
 
-$include "Bisector.mm"
-$include "Edge.mm"
-$include "Intersections.mm"
-$include "FortunesAlgorithm.mm"
-$include "SweepLine.mm"
-$include "Data.mm"
+$include "Voronoi-Monodromy//Bisector.mm"
+$include "Voronoi-Monodromy//Edge.mm"
+$include "Voronoi-Monodromy//Intersections.mm"
+$include "Voronoi-Monodromy//FortunesAlgorithm.mm"
+$include "Voronoi-Monodromy//SweepLine.mm"
+$include "Voronoi-Monodromy//Data.mm"
 
-#######################################################
-print("Checking irreducibility and obtaining problem points");
-##Check f,x,y for conditions
-		if not irreduc(f) then
-		return "Not irreducible";
-		fi;
-#################################################### Obtaining problem points
+#Check that f is reasonable here
+if not irreduc(f) then
+	return "Not irreducible";
+fi;
+n:=genus(f,x,y);
+if n<2 then
+	return "trivial Monodromy";
+fi;
 
+# Obtaining problem points Q: should f be normalized? Does that matter?
 
-f_y:=diff(f,y);
+f_y:=diff(normal(f),y);
 #problemPtsRawYup:=singularities(f, x, y);
 
-#there are a few variations to the output of the solve command
+#there are a few variations to the output of the solve command and this needs to be normalized Q:Or is it best to approximate from here instead of finding all roots explicitly
 problemPtsRaw:={solve({f_y=0, f=0},{x,y})};
 
-print("Formating data. Some curves may run into problems here.");
 for j in problemPtsRaw do
 if type(j,set) then
 problemPts:=problemPts union {allvalues(rhs(j[1]))};
-##certain polynomials will run into problems here!!!!!
 else
+##certain polynomials will run into problems in the above line, is it better to approxmate and leave the root of command?
 problemPts:=problemPts union {rhs(j)};
 fi;
 od;
-print("Conversion of problemPts completed, further refining this is also a place in which we a polynomial make not work here");
+
+#We want to work in R2 not in complex arithmetic so we further process, the accuracy at this point depends on the user
 for j in problemPts do
-problemPtsFts:=problemPtsFts union {[convert(evalf[percision](Re(j)), rational, exact), convert(evalf[percision](Im(j)),rational, exact)]};
+problemPtsFloat:=problemPtsFloat union {[Re(j), Im(j)]};
 od;
-print(problemPtsFts);
 
-###################################################
+problemPtsFloat:=evalf[percision]~(problemPtsFloat);
 
-#CURRENT STATE: Should have all problem points processed.
 
-################################################# Center
-N:=numelems(problemPts);
+#CURRENT STATE: Should have all problem points processed. Now we need to compute the center of the data to produce a bounding region
 
-if N=1 then
-return "only one problem point";
-		fi;
-center:=[normal(add(problemPtsFts[k][1]/N,k=1..N)),normal(add(problemPtsFts[k][2]/N,k=1..N))];
-aux_fun1:=(a,b)->normal(a+I*b-center[1]-I*center[2]);
+################################################# computer center and boundary sites Q:should center be complex number to make this snippit of code more readable?
+N:=numelems(problemPtsFloat);
+centerOfData:=[add(problemPtsFloat[k][1]/N,k=1..N),add(problemPtsFloat[k][2]/N,k=1..N)];
+
+aux_fun1:=(a,b)->a+I*b-centerOfData[1]-I*centerOfData[2];
+
 print("Center:");
-print(center);
+print(centerOfData);
 
-r:=convert(2*max(evalf[percision](abs~(aux_fun1~(op(problemPtsFts)))),1), rational, exact);
+#the radius can be larger than the max so lets ensure that it is atleast of the order of 10^0 Q: does changing this impact accuracy
+r:=2*max(evalf[percision]~(abs~(aux_fun1~(op(problemPtsFloat)))),1);
 print("radius");
 print(r);
 
-print("creating the boundary region");
 for j from 1 to 6 do
 #we choose a site to be vertices of the 6 sided polygon that approx circle centered at center so at center+ rexp(j*pi/3) j=1..6
-auxSites:=auxSites union {[convert(evalf[percision](Re(center[1]+I*center[2]+ r*exp(1/3*I*Pi*j))),rational,exact), convert(evalf[percision](Im(center[1]+I*center[2] + r*exp(1/3*I*Pi*j))),rational,exact)]};
+boundarySites:=boundarySites union {[centerOfData[1]+ r*evalf[percision](cos(1/3*Pi*j)) ,centerOfData[2] + r*evalf[percision](sin(1/3*Pi*j)) ]};
 od;
 
-print("Now determining distances for accuracy");
-
-minimalDist:=ComputationalGeometry[ClosestPointPair](convert(problemPtsFts union auxSites ,list))[1]; 
-print(minimalDist);
-#assuming that the dist is never zero.
-while trunc(minimalDist)=0 do
-minimalDist:=minimalDist*10;
-val:=val+1;
-end do;
-print("The distance between singularities requires is of the order");
-print(10^(-val+1));
+print("to be inputed to algo");
+print(boundarySites);
+print(problemPtsFloat);
 
 
+#apply the algorithm
 print("now applying voronoi algo");
 plotter:=Data();
 
 ## Get edges and verts in plane
-
-plotter:=FortunesAlgorithm(problemPtsFts union auxSites,plotter):
-plotter:-sites(problemPtsFts);
+plotter:=FortunesAlgorithm(problemPtsFloat union boundarySites,plotter):
+plotter:-sites(problemPtsFloat);
 
 print(plots[display]({plot(plotter:-curves,color="Red"),plots[pointplot](op(plotter:-vertices),symbol=solidcircle,color="Red")}));
 end proc;
