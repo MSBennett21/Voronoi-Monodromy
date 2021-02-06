@@ -1,4 +1,4 @@
-SweepLine := proc(pq::`module`(insert,contains,remove),out::`module`(ray,segment,line))
+SweepLine := proc(pq::`module`(insert,contains,remove),out::`module`(setRay,setSegment,setLine))
    return module()
       export initialize, site, intersection, addIntersection, terminate, debug;
       local line;

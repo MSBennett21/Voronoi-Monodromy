@@ -21,11 +21,11 @@ Bisector := proc(out, ls, rs, starter)
             rightEnd := point;
          end if;
          if starter then
-            out:-ray(op(point),0,-1,op(sites));;
+            out:-setRay(op(point),0,-1,op(sites));;
          elif leftEnd <> NULL and rightEnd <> NULL then
             # Zero length segments are possible and can be filtered out
             if leftEnd <> rightEnd then
-               out:-segment(op(leftEnd),op(rightEnd),op(sites));
+               out:-setSegment(op(leftEnd),op(rightEnd),op(sites));
             end if; 
          end if;
       end proc;
@@ -33,25 +33,25 @@ Bisector := proc(out, ls, rs, starter)
       emit := proc(direction) 
          if leftEnd = NULL and rightEnd = NULL then
             if (direction <= 0) then
-               out:-line(x,y,dx,dy,op(sites));
+               out:-setLine(x,y,dx,dy,op(sites));
             end if;
          elif dx = 0 then
             if leftEnd <> NULL then
-               out:-ray(op(leftEnd),0,1,op(sites));
+               out:-setRay(op(leftEnd),0,1,op(sites));
             else
-               out:-ray(op(rightEnd),0,1,op(sites));
+               out:-setRay(op(rightEnd),0,1,op(sites));
             end if;
          elif leftEnd <> NULL then
             if (signum(dx) < 0) then
-               out:-ray(op(leftEnd),-dx,-dy,op(sites));
+               out:-setRay(op(leftEnd),-dx,-dy,op(sites));
             else
-               out:-ray(op(leftEnd),dx,dy,op(sites));
+               out:-setRay(op(leftEnd),dx,dy,op(sites));
             end if;
          else
             if (signum(dx) < 0) then
-               out:-ray(op(rightEnd),dx,dy,op(sites));
+               out:-setRay(op(rightEnd),dx,dy,op(sites));
             else
-               out:-ray(op(rightEnd),-dx,-dy,op(sites));
+               out:-setRay(op(rightEnd),-dx,-dy,op(sites));
             end if;
          end if;
       end proc;
