@@ -1,15 +1,5 @@
 # Voronoi-Monodromy
 
-Package that computes the Voronoi diagram of the collection of problem points of an algebraic curve. A majority of the code comes from David Clark.
+Package that computes the Voronoi diagram of the collection of problem points of an algebraic curve. A majority of the code comes from David Clark, Phd (ADD REFERENCE).
 
-Voronoi is the main file
-    Priority Queue
-        The PQ given in maple does not support remove and so this is needed.
-    Monodromy
-        procedure that does the computation
-            Edge
-            Bisector
-            Data
-            Intersections
-            Fortunes
-            Algorithm
+Voronoi package contains the Monodromy procedure. This procedure has eight subpackages/subprocedures. Data is an modified version of printdiagram2D. The remaining are nearly identical to the ones given by David Clark.
