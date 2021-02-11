@@ -28,7 +28,7 @@ $include "Voronoi-Monodromy\Intersections.mm"
 	if not irreduc(f) then
 		return "Not irreducible";
 	fi;
-	if n<2 then
+	if n<1 then
 		return "trivial Monodromy";
 	fi;
 
@@ -38,7 +38,7 @@ $include "Voronoi-Monodromy\Intersections.mm"
 
 	# Solving discrimiant=0 this is one place in the code were we may have limits on what algebraic curves can be used. Q is solve the right move here?
 	# There are a few variations to the output of the solve command and this needs to be normalized Q:Or is it best to approximate from here instead of finding all roots explicitly
-	print("solving for explicit problem points");
+	#print("solving for explicit problem points");
 	problemPtsRaw:={solve({f_y=0, f=0},{x,y})};
 	for j in problemPtsRaw do
 		if type(j,set) then
@@ -69,13 +69,13 @@ $include "Voronoi-Monodromy\Intersections.mm"
 
 	aux_fun1:=(a,b)->distance([a,b],centerOfData);
 
-	print("Center:");
-	print(centerOfData);
+	#print("Center:");
+	#print(centerOfData);
 
 	#the radius can be larger than the max so lets ensure that it is atleast of the order of 10^0 Q: does changing this impact accuracy
 	r:=2*max(evalf[val1]~(aux_fun1~(op(problemPtsFloat))),1);
-	print("radius");
-	print(r);
+	#print("radius");
+	#print(r);
 
 	#we choose boundary sites at center + r*exp(j*pi/3) j=1..6
 	for j from 1 to 6 do
@@ -85,7 +85,7 @@ $include "Voronoi-Monodromy\Intersections.mm"
 		auxSet:=auxSet union {[X,0.], [0.,Y]};
 	od;
 
-	print("the amount of accuracy needed on top of the given value is found by computing the minimal dist between component values and making sure that there is enough accuracy to discren between x vals and y vals. This distance is:");
+	#print("the amount of accuracy needed on top of the given value is found by computing the minimal dist between component values and making sure that there is enough accuracy to discren between x vals and y vals. This distance is:");
 	minimalDist:=ComputationalGeometry[ClosestPointPair](convert(auxSet ,list))[1]; 
 	print(minimalDist);
 	#assuming that the dist is never zero.
@@ -94,11 +94,11 @@ $include "Voronoi-Monodromy\Intersections.mm"
 		val2:=val2+1;
 	end do;
 	Digits:=val1+val2;
-	print("boundary sites to be inputed to algo");
-	print(boundarySites);
+	#print("boundary sites to be inputed to algo");
+	#print(boundarySites);
 	
-	print("sites to be inputed to algo");
-	print(problemPtsFloat);
+	#print("sites to be inputed to algo");
+	#print(problemPtsFloat);
 
 
 	#apply the algorithm
@@ -109,11 +109,11 @@ $include "Voronoi-Monodromy\Intersections.mm"
 	
 
 	data:-getData();
-	print("The data is given below");
-	for j in data:-vertices do
-		tempCell:=data:-cellData[j];
-		print(plots[display]({plot(tempCell,color="Red"),plots[pointplot]({j},symbol=solidcircle,color="Red")}));
-		edgeData:=edgeData union tempCell;
-	od;
-	print(plots[display]({plot(edgeData,color="Red"),plots[pointplot](data:-vertices,symbol=solidcircle,color="Red")}));
+	#print("The data is given below");
+	#for j in data:-vertices do
+	#	tempCell:=data:-cellData[j];
+	#	print(plots[display]({plot(tempCell,color="Red"),plots[pointplot]({j},symbol=solidcircle,color="Red")}));
+	#	edgeData:=edgeData union tempCell;
+	#od;
+	print(plots[display]({plot(data:-edges,color="Red"),plots[pointplot](data:-vertices,symbol=solidcircle,color="Red")}));
 end proc;
